@@ -1,0 +1,29 @@
+image: openjdk:8-jdk-alpine
+
+variables:
+  MAVEN_OPTS: -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2
+
+stages:
+  - mvn-build
+  - mvn-test
+
+.mvmw:
+  cache:
+    paths:
+      - .m2/
+  before_script:
+    - chmod +x mvnw
+
+maven_build:
+  stage: mvn-build
+  extends: .mvmw
+  except:
+    - dev-docker
+  script: "./mvnw -B clean compile -DskipTests"
+
+maven_test:
+  stage: mvn-test
+  extends: .mvmw
+  except:
+  - dev-docker
+  script: "./mvnw -B clean test"
