@@ -1,0 +1,48 @@
+image: openjdk:8-jdk-alpine
+
+variables:
+  MAVEN_OPTS: -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2
+
+stages:
+  - mvn-build
+  - mvn-test
+  - mirror
+
+.mvmw:
+  cache:
+    paths:
+      - .m2/
+  before_script:
+    - chmod +x mvnw
+
+maven_build:
+  stage: mvn-build
+  extends: .mvmw
+  except:
+    - dev-docker
+  script: "./mvnw -B clean compile -DskipTests"
+
+maven_test:
+  stage: mvn-test
+  extends: .mvmw
+  except:
+  - dev-docker
+  script: "./mvnw -B clean test"
+
+github_mirror:
+  stage: mirror
+  image:
+    name: alpine/git
+    entrypoint: [ "/bin/sh", "-c" ]
+  only:
+    - master
+    - dev-master
+  variables:
+    GIT_STRATEGY: clone
+    GIT_CHECKOUT: "false"
+  script: |
+    cd /tmp
+    git clone --mirror ${CI_REPOSITORY_URL} project
+    cd project
+    git remote add github https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GITHUB_USER}/mail-sync-api.git
+    git push --mirror github
