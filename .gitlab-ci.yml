@@ -44,5 +44,5 @@ github_mirror:
     cd /tmp
     git clone --mirror ${CI_REPOSITORY_URL} project
     cd project
-    git remote add github https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GITHUB_USER}/mail-sync-api.git
+    git remote add github https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/TechnocityOpenSource/mail-sync-api.git
     git push --mirror github
