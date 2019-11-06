@@ -8,6 +8,7 @@ import tn.technocity.mail.sync.api.dto.FolderDTO;
 import tn.technocity.mail.sync.api.service.MailServerService;
 
 import javax.mail.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("mail-server")
@@ -35,7 +36,7 @@ public class MailServerEndpoint {
      * @return
      */
     @GetMapping
-    private ResponseEntity<FolderDTO> getAllFolders(@RequestBody AccountDTO accountDTO) throws MessagingException {
+    private ResponseEntity<List<FolderDTO>> getAllFolders(@RequestBody AccountDTO accountDTO) throws MessagingException {
         return ResponseEntity.ok(mailServerService.getFolders(accountDTO));
     }
 }
