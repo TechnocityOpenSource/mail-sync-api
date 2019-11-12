@@ -1,0 +1,4 @@
+include:
+  - project: 'technocity/apps/mail-sync/mail-sync-ops'
+    ref: master
+    file: '/.gitlab-ci-api.yml'
