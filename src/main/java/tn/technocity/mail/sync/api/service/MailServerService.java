@@ -26,16 +26,15 @@ public class MailServerService {
 
     public List<FolderDTO> getFolders(AccountDTO accountDTO) throws MessagingException {
         Store store = connectAndGetStore(accountDTO);
-        Folder[] folders = store.getDefaultFolder().list();
+        Folder[] folders = store.getDefaultFolder().list("*");
         logger.info("Mail folders have been successfully loaded ...");
-        // TODO: get folders size + get all subFolders (with recursivity)
         return Arrays.asList(folders).stream().map(folder -> FolderDTO.builder()
                 .folderName(folder.getFullName())
                 .size(getFolderSize(folder))
                 .build()).collect(Collectors.toList());
     }
 
-    private Store connectAndGetStore(AccountDTO accountDTO) throws MessagingException {
+    public Store connectAndGetStore(AccountDTO accountDTO) throws MessagingException {
 
         logger.info("1st ===> setup Mail Server Properties..");
         Properties mailServerProperties = System.getProperties();
