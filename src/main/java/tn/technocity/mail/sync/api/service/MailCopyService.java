@@ -9,12 +9,19 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.Store;
 
+
 @Service
 public class MailCopyService {
 
     @Autowired
     private MailServerService mailServerService;
 
+    /**
+     * Copy Folder from a source account to another (also support Folder which contain subfolders)
+     *
+     * @param action
+     * @throws MessagingException
+     */
     public void copy(ActionDTO action) throws MessagingException {
 
         if (StringUtils.isEmpty(action.getSourceFolder())) {
@@ -28,71 +35,93 @@ public class MailCopyService {
         Store sourceStore = mailServerService.connectAndGetStore(action.getAccountSource());
         Store targetStore = mailServerService.connectAndGetStore(action.getAccountTarget());
 
-        Folder sourceFolder = sourceStore.getFolder(action.getSourceFolder());
-        sourceFolder.open(Folder.READ_ONLY);
-
-        Folder targetFolder = getOrCreateFolder(targetStore, action.getTargetFolder());
-        targetFolder.open(Folder.READ_WRITE);
-
-
-
-        sourceFolder.copyMessages(sourceFolder.getMessages(), targetFolder);
-
-        // Folder destinationFolder = createFolder(storeOfDestinationMail, storeOfDestinationMail.getDefaultFolder(), action.getFolderName());
-/*
-        if (subfolderOfOriginalMail == null) {
-            //folder without subfolders
-            Message[] messages = folderOfOriginMail.getMessages();
-            folderOfOriginMail.copyMessages(messages, destinationFolder);
-        } else {
-            //folder with subfolders
-            for (Folder folder : subfolderOfOriginalMail) {
-                String subfolderName = folder.getName();
-                Folder destinationSubFolder = createFolder(storeOfDestinationMail, destinationFolder, subfolderName);
-                Message[] messages = storeOfOriginMail.getFolder(subfolderName).getMessages();
-                storeOfOriginMail.getFolder(subfolderName).copyMessages(messages, destinationSubFolder);
-            }
-        }
- */
+        copyMailsAndFolders(sourceStore, action.getSourceFolder(), targetStore.getDefaultFolder(), action.getTargetFolder());
     }
 
-    private Folder getOrCreateFolder(Store targetStore, String targetFolderName) throws MessagingException {
-        Folder targetFolder = targetStore.getFolder(targetFolderName);
+    /**
+     * Copy all Folder from a source account to a target account
+     *
+     * @param action
+     * @throws MessagingException
+     */
+    public void copyAll(ActionDTO action) throws MessagingException {
+
+        Store sourceStore = mailServerService.connectAndGetStore(action.getAccountSource());
+        Store targetStore = mailServerService.connectAndGetStore(action.getAccountTarget());
+
+        for (Folder sourceFolder : sourceStore.getDefaultFolder().list()) {
+            copyMailsAndFolders(sourceStore, sourceFolder.getName(), targetStore.getDefaultFolder(), sourceFolder.getName());
+        }
+
+    }
+
+    /**
+     * Recursively copy mails and subfolders
+     *
+     * @param sourceStore
+     * @param sourceFolderName
+     * @param targetParent
+     * @param targetFolderName
+     * @throws MessagingException
+     */
+    private void copyMailsAndFolders(Store sourceStore, String sourceFolderName, Folder targetParent, String targetFolderName) throws MessagingException {
+
+        Folder sourceFolder = sourceStore.getFolder(sourceFolderName);
+        Folder targetFolder = getOrCreateFolder(targetParent, targetFolderName);
+
+        if (sourceFolder.getMessageCount() != 0) {
+            copyMessages(sourceFolder, targetFolder);
+        }
+
+        for (Folder subFolderSource : sourceStore.getFolder(sourceFolder.getFullName()).list()) {
+            copyMailsAndFolders(sourceStore, subFolderSource.getFullName(), targetFolder, subFolderSource.getName());
+        }
+
+    }
+
+    /**
+     * Copy mails from a root folder of a source account to a root folder of a target account
+     *
+     * @param targetFolder
+     * @throws MessagingException
+     */
+    private void copyMessages(Folder sourceFolder, Folder targetFolder) throws MessagingException {
+        sourceFolder.open(Folder.READ_ONLY);
+        sourceFolder.copyMessages(sourceFolder.getMessages(), targetFolder);
+    }
+
+    /**
+     * get folder if it is already existed; create folder if it does not exist
+     *
+     * @param folderName
+     * @return
+     * @throws MessagingException
+     */
+    private Folder getOrCreateFolder(Folder parent, String folderName) throws MessagingException {
+        Folder targetFolder = parent.getFolder(folderName);
         if (!targetFolder.exists()) {
-            createFolder(targetStore, targetStore.getDefaultFolder(), targetFolderName);
+            createFolder(parent, folderName);
         }
         return targetFolder;
     }
 
     /**
-     * Create if not exist
+     * Create Folder respecting hierarchy
      *
-     * @param store
-     * @param folder
+     * @param parent
      * @param folderName
      * @return
      * @throws MessagingException
      */
-    private Folder createFolder(Store store, Folder folder, String folderName) throws MessagingException {
-        if (folder.getParent() == null) {
-            Folder defaultFolder = store.getDefaultFolder();
-            return create(store, defaultFolder, folderName);
-        } else {
-            Folder defaultFolder = store.getFolder(folder.getName());
-            return create(store, defaultFolder, folderName);
-        }
-    }
-
-    /*
-     * Note that in Gmail folder hierarchy is not maintained.
-     * */
-    private Folder create(Store store, Folder parent, String folderName) throws MessagingException {
+    private Folder createFolder(Folder parent, String folderName) throws MessagingException {
         Folder newFolder = parent.getFolder(folderName);
         if (newFolder.create(Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS)) {
             newFolder.setSubscribed(true);
-            return store.getFolder(folderName);
+            return parent.getFolder(folderName);
         } else {
             throw new RuntimeException("Cannot create folder " + folderName + " in destination mail box.");
         }
     }
+
+
 }

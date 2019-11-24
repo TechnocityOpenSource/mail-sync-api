@@ -57,4 +57,10 @@ public class MailServerEndpoint {
         mailCopyService.copy(action);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/copyAll")
+    public ResponseEntity<Void> copyAll (@RequestBody ActionDTO action) throws MessagingException {
+        mailCopyService.copyAll(action);
+        return ResponseEntity.ok().build();
+    }
 }
