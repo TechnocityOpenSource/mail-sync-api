@@ -25,8 +25,8 @@ public class Swagger2Config {
     }
 
     private ApiInfo apiEndPointsInfo() {
-        return new ApiInfoBuilder().title("Spring Boot REST API")
-                .description("Mail Sync Management REST API")
+        return new ApiInfoBuilder().title("Mail Sync REST API")
+                .description("Mail Sync REST API")
                 .contact(new Contact("Amin Guidara", "www.technocity.tn", "guidara.amine@gmail.com"))
                 .license("Apache 2.0")
                 .licenseUrl("http://www.apache.org/licenses/LICENSE-2.0.html")
