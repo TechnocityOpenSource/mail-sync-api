@@ -18,6 +18,7 @@
         <java.version>1.8</java.version>
         <swagger2.version>2.9.2</swagger2.version>
         <java-mail.version>1.6.0</java-mail.version>
+        <logstash-logback-encoder.version>6.2</logstash-logback-encoder.version>
     </properties>
 
     <dependencies>
@@ -69,6 +70,12 @@
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
             <version>${java-mail.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logstash-logback-encoder.version}</version>
         </dependency>
 
         <dependency>
