@@ -28,7 +28,7 @@ public class MailServerEndpoint {
      * @return
      * @throws MessagingException
      */
-    @PostMapping
+    @PostMapping("connect")
     private ResponseEntity<?> connect(@RequestBody AccountDTO accountDTO) throws MessagingException {
         return ResponseEntity.ok(mailServerService.connect(accountDTO));
     }
@@ -40,7 +40,7 @@ public class MailServerEndpoint {
      * @return
      * @throws MessagingException
      */
-    @GetMapping
+    @PostMapping("folder-list")
     private ResponseEntity<List<FolderDTO>> getAllFolders(@RequestBody AccountDTO accountDTO) throws MessagingException {
         return ResponseEntity.ok(mailServerService.getFolders(accountDTO));
     }

@@ -17,6 +17,7 @@
     <properties>
         <java.version>1.8</java.version>
         <swagger2.version>2.9.2</swagger2.version>
+        <commons-io.version>2.6</commons-io.version>
         <java-mail.version>1.6.0</java-mail.version>
         <logstash-logback-encoder.version>6.2</logstash-logback-encoder.version>
     </properties>
@@ -59,6 +60,12 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
         </dependency>
 
         <dependency>
