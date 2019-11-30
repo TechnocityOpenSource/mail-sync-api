@@ -2,15 +2,14 @@ package tn.technocity.mail.sync.api.service;
 
 import com.sun.mail.imap.IMAPMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
 import tn.technocity.mail.sync.api.dto.AccountDTO;
 import tn.technocity.mail.sync.api.dto.FolderDTO;
-import tn.technocity.mail.sync.api.rest.MailServerEndpoint;
 
 import javax.mail.*;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -40,12 +39,18 @@ public class MailServerService {
     public List<FolderDTO> getFolders(AccountDTO accountDTO) throws MessagingException {
         Store store = connectAndGetStore(accountDTO);
         log.info("Load Mail folders..");
+
         Folder[] folders = store.getDefaultFolder().list("*");
         log.info("Mail folders have been successfully loaded..");
-        return Arrays.asList(folders).stream().map(folder -> FolderDTO.builder()
+
+        List<FolderDTO> folderList = Arrays.asList(folders).stream().map(folder -> FolderDTO.builder()
                 .folderName(folder.getFullName())
                 .size(getFolderSize(folder))
                 .build()).collect(Collectors.toList());
+
+        Collections.reverse(folderList);
+
+        return folderList;
     }
 
     protected Store connectAndGetStore(AccountDTO accountDTO) throws MessagingException {
@@ -77,7 +82,7 @@ public class MailServerService {
      * @return
      * @throws MessagingException
      */
-    private long getFolderSize(Folder folder) {
+    private String getFolderSize(Folder folder) {
         long msgsSize = 0;
         try {
             if (folder.getName().length() != 0) { //root folder
@@ -90,10 +95,7 @@ public class MailServerService {
                     for (int i = 0; i < messages.length; i++) {
                         IMAPMessage tmp = (IMAPMessage) messages[i];
                         if (tmp.getSize() != -1) {
-                            log.info("tmp.getSize() " + tmp.getSize());
                             msgsSize += tmp.getSize();
-                            log.info("msgs_size " + msgsSize); //size in bytes
-                            log.info(String.valueOf(msgsSize / (1024L * 1024L))); //converted to MB
                         }
                     }
                 }
@@ -103,6 +105,6 @@ public class MailServerService {
             log.error(e.getMessage(), e);
         }
 
-        return msgsSize;
+        return FileUtils.byteCountToDisplaySize(msgsSize);
     }
 }
