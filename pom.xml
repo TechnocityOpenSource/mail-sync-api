@@ -10,7 +10,7 @@
     </parent>
     <groupId>tn.technocity.mail.sync</groupId>
     <artifactId>mail-sync-api</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <name>mail-sync-api</name>
     <description>Mail Sync Api</description>
 
