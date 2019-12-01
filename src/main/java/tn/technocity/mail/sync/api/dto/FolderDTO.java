@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class FolderDTO {
     private String folderName;
-    private long size;
+    private String size;
 }
